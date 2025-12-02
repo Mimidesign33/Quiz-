@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>クイズ：日本の首都は？</h2>
+
+<!-- 4つの選択肢ボタン -->
+<button onclick="checkAnswer(0)">A. 東京</button><br>
+<button onclick="checkAnswer(1)">B. 大阪</button><br>
+<button onclick="checkAnswer(2)">C. 福岡</button><br>
+<button onclick="checkAnswer(3)">D. 名古屋</button><br><br>
+
+<!-- 結果表示エリア -->
+<p id="result"></p>
+
+<script>
+  // 正解の番号（上から0,1,2,3）
+  const correctAnswer = 0;
+
+  // 回答チェック
+  function checkAnswer(choice) {
+    if (choice === correctAnswer) {
+      document.getElementById("result").innerText = "⭕ 正解！";
+    } else {
+      document.getElementById("result").innerText = "❌ 不正解…";
+    }
+  }
+</script>
+
+</body>
+</html>
