@@ -1,31 +1,346 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>クイズ：日本の首都は？</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.15);
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --text-main: #f9fafb;
+      --text-sub: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(145deg, #020617, #020617);
+      border-radius: 24px;
+      padding: 20px 18px 18px;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(129, 140, 248, 0.18), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-sub);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .question-card {
+      margin-top: 10px;
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .question-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .choices {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 14px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text-main);
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+      box-shadow:
+        0 0 0 1px rgba(148, 163, 184, 0.35),
+        0 10px 18px rgba(15, 23, 42, 0.9);
+      transition:
+        transform 0.08s ease-out,
+        box-shadow 0.12s ease-out,
+        background 0.12s ease-out,
+        box-shadow 0.12s ease-out;
+    }
+
+    .choice-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .choice-label {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .choice-text {
+      font-size: 15px;
+    }
+
+    .choice-arrow {
+      font-size: 16px;
+      opacity: 0.7;
+    }
+
+    .choice-btn:active {
+      transform: scale(0.97) translateY(1px);
+      box-shadow:
+        0 0 0 1px rgba(129, 140, 248, 0.8),
+        0 6px 14px rgba(31, 41, 55, 0.95);
+    }
+
+    .choice-btn.disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow:
+        0 0 0 1px rgba(148, 163, 184, 0.25),
+        0 4px 10px rgba(15, 23, 42, 0.8);
+    }
+
+    .choice-btn.correct {
+      box-shadow:
+        0 0 0 1px rgba(34, 197, 94, 0.8),
+        0 10px 20px rgba(22, 163, 74, 0.55);
+      background: radial-gradient(circle at top left, rgba(22, 163, 74, 0.3), transparent 60%);
+    }
+
+    .choice-btn.wrong {
+      box-shadow:
+        0 0 0 1px rgba(248, 113, 113, 0.9),
+        0 10px 20px rgba(185, 28, 28, 0.7);
+      background: radial-gradient(circle at top right, rgba(248, 113, 113, 0.32), transparent 60%);
+    }
+
+    .result {
+      margin-top: 14px;
+      font-size: 15px;
+      min-height: 20px;
+    }
+
+    .result.correct {
+      color: var(--correct);
+    }
+
+    .result.wrong {
+      color: var(--wrong);
+    }
+
+    .footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    @media (max-width: 380px) {
+      .title {
+        font-size: 16px;
+      }
+      .question-text {
+        font-size: 16px;
+      }
+      .choice-text {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
 <body>
 
-<h2>クイズ：日本の首都は？</h2>
+  <div class="app">
+    <div class="app-header">
+      <div>
+        <div class="title">年末クイズバトル</div>
+        <div class="subtitle">スマホでタップして参加できます</div>
+      </div>
+      <div class="badge">
+        <span class="badge-dot"></span>
+        LIVE
+      </div>
+    </div>
 
-<!-- 4つの選択肢ボタン -->
-<button onclick="checkAnswer(0)">A. 東京</button><br>
-<button onclick="checkAnswer(1)">B. 大阪</button><br>
-<button onclick="checkAnswer(2)">C. 福岡</button><br>
-<button onclick="checkAnswer(3)">D. 名古屋</button><br><br>
+    <div class="question-card">
+      <div class="question-label">Q1</div>
+      <div class="question-text">日本の首都はどこでしょう？</div>
+    </div>
 
-<!-- 結果表示エリア -->
-<p id="result"></p>
+    <div class="choices">
+      <button class="choice-btn" data-choice="0">
+        <div class="choice-main">
+          <div class="choice-label">A</div>
+          <div class="choice-text">東京</div>
+        </div>
+        <div class="choice-arrow">›</div>
+      </button>
 
-<script>
-  // 正解の番号（上から0,1,2,3）
-  const correctAnswer = 0;
+      <button class="choice-btn" data-choice="1">
+        <div class="choice-main">
+          <div class="choice-label">B</div>
+          <div class="choice-text">大阪</div>
+        </div>
+        <div class="choice-arrow">›</div>
+      </button>
 
-  // 回答チェック
-  function checkAnswer(choice) {
-    if (choice === correctAnswer) {
-      document.getElementById("result").innerText = "⭕ 正解！";
-    } else {
-      document.getElementById("result").innerText = "❌ 不正解…";
-    }
-  }
-</script>
+      <button class="choice-btn" data-choice="2">
+        <div class="choice-main">
+          <div class="choice-label">C</div>
+          <div class="choice-text">福岡</div>
+        </div>
+        <div class="choice-arrow">›</div>
+      </button>
 
+      <button class="choice-btn" data-choice="3">
+        <div class="choice-main">
+          <div class="choice-label">D</div>
+          <div class="choice-text">札幌</div>
+        </div>
+        <div class="choice-arrow">›</div>
+      </button>
+    </div>
+
+    <p id="result" class="result"></p>
+
+    <div class="footer">
+      <span class="pill">4択クイズ / 1問目</span>
+      <span>タップは1回だけ</span>
+    </div>
+  </div>
+
+  <script>
+    const correctAnswer = 0; // 0=A, 1=B, 2=C, 3=D
+    let answered = false;
+
+    const resultEl = document.getElementById("result");
+    const buttons = document.querySelectorAll(".choice-btn");
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (answered) return; // 2回目以降は無視
+
+        const choice = Number(btn.dataset.choice);
+        answered = true;
+
+        // 全ボタンを「押せない＆薄く」する
+        buttons.forEach(b => {
+          b.classList.add("disabled");
+        });
+
+        if (choice === correctAnswer) {
+          resultEl.textContent = "⭕ 正解！ナイスです🎉";
+          resultEl.classList.add("correct");
+          btn.classList.add("correct");
+        } else {
+          resultEl.textContent = "❌ 不正解… 正解は「東京」です";
+          resultEl.classList.add("wrong");
+          btn.classList.add("wrong");
+        }
+      });
+    });
+  </script>
 </body>
 </html>
